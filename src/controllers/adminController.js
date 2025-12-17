@@ -37,12 +37,20 @@ export const createAdmin = async (req, res) => {
 
 export const login=async (req,res)=>{
 
+  const {name,password}=req.body;
+  if(!name||!password){
+    console.log("Name or password missing");
+    return res.status(400).json({
+      status:"failure",
+      message:"all parameters required please enter"
+    })
+  }
   const admin = await Admin.findOne(
     {
         where:req.name
     }
   );
- const token = createToken({ id: admin.id });
+ const token = createToken({ id: admin.id,role:"admin",expiresIn: "1d"  });
 
  res.cookie("token", token, {
    httpOnly: true,
@@ -52,3 +60,6 @@ export const login=async (req,res)=>{
     
  return res.json({ success: true, token });
 };
+
+
+
