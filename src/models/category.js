@@ -3,9 +3,12 @@ import { Model } from 'sequelize';
 export default (sequelize, DataTypes) => {
   class Category extends Model {
     static associate(models) {
-      // define associations here (later)
-      // example:
-      // Category.hasMany(models.Product, { foreignKey: 'category_id' });
+      // define associations here
+      Category.hasMany(models.SubCategory, {
+        foreignKey: 'categoryId',
+        as: 'subCategories', // alias for accessing subcategories
+        onDelete: 'CASCADE',
+      });
     }
   }
 
