@@ -3,8 +3,14 @@ import cors from "cors";
 import adminRoutes from "./routes/AdminRoutes.js";
 import categoryRoutes from "./routes/categoryRoute.js"
 import subCategoryRoutes from "./routes/subCategoryRoutes.js";
+import productRoutes from "./routes/productRoutes.js"; // Import productRoutes
 import sequelize from "./config/db.js";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -21,11 +27,13 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'))); // Serve static files
 
 app.use("/admin", adminRoutes);
 
 app.use("/admin-category", categoryRoutes);
 app.use("/admin-subcategory", subCategoryRoutes);
+app.use("/product", productRoutes); // Register product routes
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

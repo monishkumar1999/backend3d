@@ -12,6 +12,11 @@ const Product = sequelize.define('Product', {
     allowNull: false,
     comment: 'e.g., "Classic Mens T-Shirt"',
   },
+  subCategoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: 'FK to SubCategory',
+  },
   slug: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -21,7 +26,7 @@ const Product = sequelize.define('Product', {
   base_model_url: {
     type: DataTypes.STRING,
     allowNull: false,
-    comment: 'The URL to the raw .glb file',
+    comment: 'The URL/Path to the raw .glb file',
   },
   configuration: {
     type: DataTypes.JSON,
