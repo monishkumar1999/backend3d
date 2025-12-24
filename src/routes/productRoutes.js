@@ -3,6 +3,7 @@ import multer from "multer";
 import path from "path";
 import { createProduct, getProductBySlug, getProductsList } from "../controllers/productController.js";
 import fs from 'fs';
+import upload from "../middleware/admin/upload.js";
 
 const router = express.Router();
 
@@ -22,7 +23,6 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
 
 // POST /api/products/create
 router.post("/create", upload.any(), createProduct);
