@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import { createProduct, getProductBySlug, getProductsList } from "../controllers/productController.js";
+import { saveUserDesign, getDesignById, getUserDesigns } from "../controllers/designController.js";
 import fs from 'fs';
 import upload from "../middleware/admin/upload.js";
 
@@ -30,7 +31,17 @@ router.post("/create", upload.any(), createProduct);
 // GET /api/products/list
 router.get("/list", getProductsList);
 
-// GET /api/products/:slug
+// Design Routes
+// POST /api/product/save-design
+router.post("/save-design", upload.any(), saveUserDesign);
+
+// GET /api/product/design/:id
+router.get("/design/:id", getDesignById);
+
+// GET /api/product/designs
+router.get("/designs", getUserDesigns);
+
+// GET /api/products/:slug (Dynamic route should be last)
 router.get("/:slug", getProductBySlug);
 
 export default router;

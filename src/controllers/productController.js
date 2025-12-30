@@ -1,6 +1,8 @@
 import Product from "../models/Product.js";
 import ProductMesh from "../models/ProductMesh.js";
 import sequelize from "../config/db.js";
+import { createSignedUrl, signProductUrls } from "../utils/s3SignedUrl.js";
+
 
 export const createProduct = async (req, res) => {
   const t = await sequelize.transaction();
@@ -87,19 +89,30 @@ export const createProduct = async (req, res) => {
 };
 
 
+
 export const getProductBySlug = async (req, res) => {
   try {
+
+
     const product = await Product.findOne({
       where: { id: req.params.slug },
-      include: [{ model: ProductMesh, as: 'meshes' }]
+      include: [{ model: ProductMesh, as: "meshes" }],
     });
-    if (!product) return res.status(404).json({ success: false, message: "Product not found" });
-    res.json({ success: true, product });
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    const productJson = await signProductUrls(product.toJSON());
+
+    res.json({ success: true, product: productJson });
+
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
 
 export const getProductsList = async (req, res) => {
   try {

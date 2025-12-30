@@ -4,6 +4,7 @@ import adminRoutes from "./routes/AdminRoutes.js";
 import categoryRoutes from "./routes/categoryRoute.js"
 import subCategoryRoutes from "./routes/subCategoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js"; // Import productRoutes
+import designRoutes from "./routes/designRoutes.js"; // Import designRoutes
 import sequelize from "./config/db.js";
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -34,6 +35,8 @@ app.use("/admin", adminRoutes);
 app.use("/admin-category", categoryRoutes);
 app.use("/admin-subcategory", subCategoryRoutes);
 app.use("/product", productRoutes); // Register product routes
+app.use("/design", designRoutes); // Register design routes
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

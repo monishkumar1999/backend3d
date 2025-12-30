@@ -4,6 +4,9 @@ import sequelize from "../config/db.js";
 import Admin from "./Admin.js";
 import CategoryModel from "./category.js";
 import SubCategoryModel from "./SubCategory.js";
+import UserDesign from "./UserDesign.js";
+import Product from "./Product.js";
+import ProductMesh from "./ProductMesh.js";
 
 // Category uses factory style
 const Category = CategoryModel(sequelize, Sequelize.DataTypes);
@@ -17,4 +20,4 @@ if (SubCategory.associate) {
     SubCategory.associate({ Category });
 }
 
-export { sequelize, Admin, Category, SubCategory };
+export { sequelize, Admin, Category, SubCategory, UserDesign, Product, ProductMesh };

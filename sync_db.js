@@ -1,6 +1,5 @@
-import sequelize from './src/config/db.js';
-import Product from './src/models/Product.js';
-import ProductMesh from './src/models/ProductMesh.js';
+import { sequelize, UserDesign, Product, ProductMesh, Category, SubCategory, Admin } from './src/models/index.js';
+
 
 const syncDB = async () => {
     try {
