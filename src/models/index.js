@@ -7,6 +7,7 @@ import SubCategoryModel from "./SubCategory.js";
 import UserDesign from "./UserDesign.js";
 import Product from "./Product.js";
 import ProductMesh from "./ProductMesh.js";
+import Customer from "./Customer.js";
 
 // Category uses factory style
 const Category = CategoryModel(sequelize, Sequelize.DataTypes);
@@ -20,4 +21,10 @@ if (SubCategory.associate) {
     SubCategory.associate({ Category });
 }
 
-export { sequelize, Admin, Category, SubCategory, UserDesign, Product, ProductMesh };
+// UserDesign associations
+Product.hasMany(UserDesign, { foreignKey: 'productId', as: 'savedDesigns' });
+UserDesign.belongsTo(Product, { foreignKey: 'productId' });
+UserDesign.belongsTo(Customer, { foreignKey: 'customerId', as: 'Customer' });
+Customer.hasMany(UserDesign, { foreignKey: 'customerId', as: 'Designs' });
+
+export { sequelize, Admin, Category, SubCategory, UserDesign, Product, ProductMesh, Customer };

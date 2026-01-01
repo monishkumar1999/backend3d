@@ -5,6 +5,8 @@ import categoryRoutes from "./routes/categoryRoute.js"
 import subCategoryRoutes from "./routes/subCategoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js"; // Import productRoutes
 import designRoutes from "./routes/designRoutes.js"; // Import designRoutes
+import customerRoutes from "./routes/customerRoutes.js"; // Import customerRoutes
+import "./models/index.js"; // Ensure models are registered
 import sequelize from "./config/db.js";
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -36,10 +38,15 @@ app.use("/admin-category", categoryRoutes);
 app.use("/admin-subcategory", subCategoryRoutes);
 app.use("/product", productRoutes); // Register product routes
 app.use("/design", designRoutes); // Register design routes
+app.use("/customer", customerRoutes); // Register customer routes
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
 sequelize.authenticate()
-  .then(() => console.log("DB connected successfully"))
+  .then(() => {
+    console.log("DB connected successfully");
+    return sequelize.sync(); // Sync models to database
+  })
+  .then(() => console.log("Database synced"))
   .catch((err) => console.error("DB connection error:", err));

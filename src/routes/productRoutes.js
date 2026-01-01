@@ -5,6 +5,8 @@ import { createProduct, getProductBySlug, getProductsList } from "../controllers
 import { saveUserDesign, getDesignById, getUserDesigns } from "../controllers/designController.js";
 import fs from 'fs';
 import upload from "../middleware/admin/upload.js";
+import designUpload from "../middleware/designUpload.js";
+import { authenticate, authorize } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -25,23 +27,24 @@ const storage = multer.diskStorage({
 });
 
 
-// POST /api/products/create
-router.post("/create", upload.any(), createProduct);
+// POST /api/products/create - Admin Only
+router.post("/create", authenticate, authorize("admin"), upload.any(), createProduct);
 
-// GET /api/products/list
-router.get("/list", getProductsList);
+// GET /api/products/list - Admin and Customer
+router.get("/list", authenticate, authorize("admin", "customer"), getProductsList);
 
 // Design Routes
+// Design Routes - Customer Only for saving
 // POST /api/product/save-design
-router.post("/save-design", upload.any(), saveUserDesign);
+router.post("/save-design", authenticate, authorize("customer"), designUpload.any(), saveUserDesign);
 
 // GET /api/product/design/:id
-router.get("/design/:id", getDesignById);
+router.get("/design/:id", authenticate, authorize("customer", "admin"), getDesignById);
 
 // GET /api/product/designs
-router.get("/designs", getUserDesigns);
+router.get("/designs", authenticate, authorize("customer"), getUserDesigns);
 
-// GET /api/products/:slug (Dynamic route should be last)
-router.get("/:slug", getProductBySlug);
+// GET /api/products/:slug (Dynamic route should be last) - Admin and Customer
+router.get("/:slug", authenticate, authorize("admin", "customer"), getProductBySlug);
 
 export default router;

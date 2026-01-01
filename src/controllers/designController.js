@@ -5,7 +5,10 @@ import { signDesignUrls } from '../utils/s3SignedUrl.js';
 
 export const saveUserDesign = async (req, res) => {
     try {
-        const { productId, designData, designName } = req.body;
+        let { productId, designData, designName, design_data } = req.body;
+
+        // Handle input names consistently
+        designData = designData || design_data;
 
         // 1. Validate basic input
         if (!productId || !designData) {
@@ -14,33 +17,46 @@ export const saveUserDesign = async (req, res) => {
             });
         }
 
-        // 2. Check if product exists (Optional but recommended)
+        // If designData is a string (from multipart/form-data), parse it
+        if (typeof designData === 'string') {
+            try {
+                designData = JSON.parse(designData);
+            } catch (e) {
+                return res.status(400).json({ message: "Invalid JSON format for designData" });
+            }
+        }
+
+        // 2. Check if product exists
         const product = await Product.findByPk(productId);
         if (!product) {
             return res.status(404).json({ message: "Product not found." });
         }
 
-        // 3. Handle S3 uploads for stickers if they are data URLs
+        // 3. Handle S3 uploads for stickers
         if (designData.meshStickers) {
+            const files = req.files || [];
+
             for (const [meshName, stickers] of Object.entries(designData.meshStickers)) {
-                if (Array.isArray(stickers)) {
-                    for (let i = 0; i < stickers.length; i++) {
-                        const sticker = stickers[i];
-                        if (sticker.url && sticker.url.startsWith('data:')) {
-                            const fileName = `${productId}_${meshName}_sticker_${i}.png`;
-                            const s3Url = await uploadToS3(sticker.url, 'designs/stickers', fileName);
-                            sticker.url = s3Url;
-                        }
+                if (!Array.isArray(stickers)) continue;
+
+                for (let i = 0; i < stickers.length; i++) {
+                    const sticker = stickers[i];
+
+                    // A. Check if the sticker was uploaded as a file (matching by sticker id or a custom field)
+                    // We assume the frontend sends the file with the field name equal to the sticker id
+                    const uploadedFile = files.find(f => f.fieldname === sticker.id || f.fieldname === `sticker_${sticker.id}`);
+
+                    if (uploadedFile) {
+                        // Use the S3 location from multer-s3
+                        sticker.url = uploadedFile.location;
                     }
-                } else if (typeof stickers === 'object' && stickers !== null) {
-                    // Handle case where meshStickers might be an object of stickers instead of array
-                    for (const [stickerId, sticker] of Object.entries(stickers)) {
-                        if (sticker.url && sticker.url.startsWith('data:')) {
-                            const fileName = `${productId}_${meshName}_${stickerId}.png`;
-                            const s3Url = await uploadToS3(sticker.url, 'designs/stickers', fileName);
-                            sticker.url = s3Url;
-                        }
+                    // B. Else check if it's a data URL (base64)
+                    else if (sticker.url && sticker.url.startsWith('data:')) {
+                        const fileName = `${productId}_${meshName}_sticker_${sticker.id || i}.png`;
+                        const s3Url = await uploadToS3(sticker.url, 'users_stickers', fileName);
+                        sticker.url = s3Url;
                     }
+                    // C. Note: If it's a blob URL and wasn't uploaded, it will likely fail on the frontend or be broken here.
                 }
             }
         }
@@ -49,7 +65,8 @@ export const saveUserDesign = async (req, res) => {
         const design = await UserDesign.create({
             productId,
             designData,
-            designName: designName || 'My Custom Design'
+            designName: designName || 'My Custom Design',
+            customerId: req.user?.id // Save customer ID if available
         });
 
         return res.status(201).json({
@@ -70,10 +87,17 @@ export const saveUserDesign = async (req, res) => {
 export const getUserDesigns = async (req, res) => {
 
     try {
-        const designs = await UserDesign.findAll({
+        const queryOptions = {
             include: [{ model: Product, as: 'Product' }],
             order: [['createdAt', 'DESC']]
-        });
+        };
+
+        // Filter by customerId if user is a customer
+        if (req.user && req.user.role === 'customer') {
+            queryOptions.where = { customerId: req.user.id };
+        }
+
+        const designs = await UserDesign.findAll(queryOptions);
         const signedDesigns = await Promise.all(designs.map(d => signDesignUrls(d.toJSON())));
 
         return res.status(200).json({

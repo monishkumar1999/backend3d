@@ -17,6 +17,14 @@ const UserDesign = sequelize.define('UserDesign', {
         },
         onDelete: 'CASCADE',
     },
+    customerId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Customer',
+            key: 'id',
+        },
+    },
     // This stores the meshColors, meshStickers, and materialSettings
     designData: {
         type: DataTypes.JSON,
@@ -33,8 +41,10 @@ const UserDesign = sequelize.define('UserDesign', {
     tableName: 'user_designs',
 });
 
-// Define associations
-Product.hasMany(UserDesign, { foreignKey: 'productId', as: 'savedDesigns' });
-UserDesign.belongsTo(Product, { foreignKey: 'productId' });
+// Product.hasMany(UserDesign, { foreignKey: 'productId', as: 'savedDesigns' });
+// UserDesign.belongsTo(Product, { foreignKey: 'productId' });
+
+// Association with Customer
+// UserDesign.belongsTo(sequelize.models.Customer, { foreignKey: 'customerId', as: 'Customer' });
 
 export default UserDesign;
